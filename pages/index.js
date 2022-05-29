@@ -1,10 +1,28 @@
 import Head from 'next/head'
+import { useState, useEffect } from 'react'
 import Button from '../components/Button'
 import Github from '../components/Icons/Github'
+import { logInWithGithub, onAuthStateChanged } from '../firebase/client'
 import styles from '../styles/style'
 
 
 export default function Home() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    onAuthStateChanged(setUser)
+  }, [])
+  
+
+  const handleClick = () => {
+    logInWithGithub()
+    .then(user => {
+      const { avatarURL, username} = user;
+      console.log(user)
+      setUser(user);
+    })
+    .catch(error => console.log(error))
+  }
   return (
     <div>
       <Head>
@@ -17,10 +35,14 @@ export default function Home() {
         <h1>
           Welcome to <a href="">DevTer!</a>
         </h1>
-        <Button>
+        { user === null ? <Button onClick={handleClick}>
           <Github fill='white'/>
-          Login with github
-        </Button>
+            Login with github
+          </Button> :
+          <div>
+            <span>{user.username}</span>
+          </div>
+        }
       </main>
       <style jsx global>{styles}</style>
     </div>
